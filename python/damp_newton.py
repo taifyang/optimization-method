@@ -52,13 +52,13 @@ def damp_newton_x0x1(f, X0, max_iter, epsilon):
     df1 = sympy.diff(f, x1)
     d2f0 = sympy.diff(f, x0, 2)
     d2f1 = sympy.diff(f, x1, 2)
-    dx0dx1 = sympy.diff(sympy.diff(f, x0), x1)
+    df0df1 = sympy.diff(sympy.diff(f, x0), x1)
     beta = 0.5
     delta = 0.25
     while i < max_iter:
         gk = np.mat([float(df0.subs([(x0, X0[0]), (x1, X0[1])])), float(df1.subs([(x0, X0[0]), (x1, X0[1])]))]).T
-        Gk = np.mat([[float(d2f0.subs([(x0, X0[0]), (x1, X0[1])])), float(dx0dx1.subs([(x0, X0[0]), (x1, X0[1])]))],
-                     [float(dx0dx1.subs([(x0, X0[0]), (x1, X0[1])])), float(d2f1.subs([(x0, X0[0]), (x1, X0[1])]))]])
+        Gk = np.mat([[float(d2f0.subs([(x0, X0[0]), (x1, X0[1])])), float(df0df1.subs([(x0, X0[0]), (x1, X0[1])]))],
+                     [float(df0df1.subs([(x0, X0[0]), (x1, X0[1])])), float(d2f1.subs([(x0, X0[0]), (x1, X0[1])]))]])
         dk = -Gk.I*gk
 
         mk = 0
