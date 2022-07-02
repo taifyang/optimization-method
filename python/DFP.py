@@ -3,7 +3,7 @@ import numpy as np
 from numpy import matlib as mb
 
 
-def DFP_x(func, x0, max_iter, epsilon):
+def DFP_x(f, x0, max_iter, epsilon):
     '''
     description:    DFP算法（一元变量）
     param f         要求极值的函数
@@ -14,36 +14,36 @@ def DFP_x(func, x0, max_iter, epsilon):
     '''
     i = 0
     x0 = float(x0)
-    d_func = sympy.diff(func, x)
+    df = sympy.diff(f, x)
     beta = 0.5
     delta = 0.25
     Hk = 1
     while i < max_iter:
-        gk = d_func.subs(x, x0)
+        gk = df.subs(x, x0)
         dk = -Hk*gk
 
         mk = 0
         while mk < 10:
-            if func.subs(x, x0+beta**mk*dk) < func.subs(x, x0) + delta*beta**mk*gk*dk:
+            if f.subs(x, x0+beta**mk*dk) < f.subs(x, x0) + delta*beta**mk*gk*dk:
                 break
             mk += 1
         xnew = x0 + beta**mk*dk
 
         sk = xnew - x0
-        yk = d_func.subs(x, xnew) - gk
+        yk = df.subs(x, xnew) - gk
 
         if sk*yk > 0:
             Hk = Hk - (Hk*yk*yk*Hk)/(yk*Hk*yk) + (sk*sk)/(sk*yk)
 
         i += 1
         print('迭代第%d次：%.5f' % (i, xnew))
-        if abs(func.subs(x, xnew)-func.subs(x, x0)) < epsilon:
+        if abs(f.subs(x, xnew)-f.subs(x, x0)) < epsilon:
             break
         x0 = xnew
     return xnew
 
 
-def DFP_x0x1(func, X0, max_iter, epsilon):
+def DFP_x0x1(f, X0, max_iter, epsilon):
     '''
     description:    DFP算法（多元变量）
     param f         要求极值的函数
@@ -54,31 +54,31 @@ def DFP_x0x1(func, X0, max_iter, epsilon):
     '''
     i = 0
     X0[0], X0[1] = float(X0[0]), float(X0[1])
-    dx0_func = sympy.diff(func, x0)
-    dx1_func = sympy.diff(func, x1)
+    df0 = sympy.diff(f, x0)
+    df1 = sympy.diff(f, x1)
     beta = 0.5
     delta = 0.25
     Hk = mb.identity(len(X0))
     while i < max_iter:
-        gk = np.mat([float(dx0_func.subs([(x0, X0[0]), (x1, X0[1])])), float(dx1_func.subs([(x0, X0[0]), (x1, X0[1])]))]).T
+        gk = np.mat([float(df0.subs([(x0, X0[0]), (x1, X0[1])])), float(df1.subs([(x0, X0[0]), (x1, X0[1])]))]).T
         dk = -Hk*gk
 
         mk = 0
         while mk < 10:
-            if func.subs([(x0, X0[0]+beta**mk*dk[0, 0]), (x1, X0[1]+beta**mk*dk[1, 0])]) < func.subs([(x0, X0[0]), (x1, X0[1])]) + delta*beta**mk*gk.T*dk:
+            if f.subs([(x0, X0[0]+beta**mk*dk[0, 0]), (x1, X0[1]+beta**mk*dk[1, 0])]) < f.subs([(x0, X0[0]), (x1, X0[1])]) + delta*beta**mk*gk.T*dk:
                 break
             mk += 1
         Xnew = [X0[0] + beta**mk*dk[0, 0], X0[1] + beta**mk*dk[1, 0]]
 
         sk = np.mat([beta**mk*dk[0, 0], beta**mk*dk[1, 0]]).T
-        yk = np.mat([float(dx0_func.subs([(x0, Xnew[0]), (x1, Xnew[1])])), float(dx1_func.subs([(x0, Xnew[0]), (x1, Xnew[1])]))]).T - gk
+        yk = np.mat([float(df0.subs([(x0, Xnew[0]), (x1, Xnew[1])])), float(df1.subs([(x0, Xnew[0]), (x1, Xnew[1])]))]).T - gk
 
         if sk.T*yk > 0:
             Hk = Hk - (Hk*yk*yk.T*Hk)/(yk.T*Hk*yk) + (sk*sk.T)/(sk.T*yk)
 
         i += 1
         print('迭代第%d次：[%.5f, %.5f]' % (i, Xnew[0], Xnew[1]))
-        if abs(func.subs([(x0, Xnew[0]), (x1, Xnew[1])])-func.subs([(x0, X0[0]), (x1, X0[1])])) < epsilon:
+        if abs(f.subs([(x0, Xnew[0]), (x1, Xnew[1])])-f.subs([(x0, X0[0]), (x1, X0[1])])) < epsilon:
             break
         X0 = Xnew
     return Xnew
